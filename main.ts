@@ -1,3 +1,9 @@
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
+    if (can_portl == 1) {
+        tiles.placeOnRandomTile(mySprite, assets.tile`myTile`)
+        can_portl = 0
+    }
+})
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     mySprite.setImage(img`
         ...c88.8c...........
@@ -23,10 +29,18 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         setdown()
     } else {
         if (mySprite.tileKindAt(TileDirection.Right, sprites.dungeon.floorMixed)) {
-            pickup()
+            pickupright()
+        } else if (mySprite.tileKindAt(TileDirection.Left, sprites.dungeon.floorMixed)) {
+            pickupleft()
         } else {
             blast()
         }
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function (sprite, location) {
+    if (can_portl == 1) {
+        tiles.placeOnRandomTile(mySprite, assets.tile`myTile0`)
+        can_portl = 0
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -97,10 +111,19 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     facing = 0
 })
 function setdown () {
-    controller.moveSprite(null)
-    location = mySprite.tilemapLocation()
-    tiles.setWallAt(location.getNeighboringLocation(CollisionDirection.Right), true)
-    tiles.setTileAt(location.getNeighboringLocation(CollisionDirection.Right), inventory.shift())
+    if (facing == 0) {
+        if (mySprite.tileKindAt(TileDirection.Right, assets.tile`transparency16`)) {
+            location = mySprite.tilemapLocation()
+            tiles.setWallAt(location.getNeighboringLocation(CollisionDirection.Left), true)
+            tiles.setTileAt(location.getNeighboringLocation(CollisionDirection.Left), inventory.shift())
+        }
+    } else {
+        if (mySprite.tileKindAt(TileDirection.Right, assets.tile`transparency16`)) {
+            location = mySprite.tilemapLocation()
+            tiles.setWallAt(location.getNeighboringLocation(CollisionDirection.Right), true)
+            tiles.setTileAt(location.getNeighboringLocation(CollisionDirection.Right), inventory.shift())
+        }
+    }
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     mySprite.setImage(img`
@@ -164,12 +187,6 @@ controller.up.onEvent(ControllerButtonEvent.Released, function () {
             `)
     }
 })
-function pickup () {
-    location = mySprite.tilemapLocation()
-    tiles.setWallAt(location.getNeighboringLocation(CollisionDirection.Right), false)
-    tiles.setTileAt(location.getNeighboringLocation(CollisionDirection.Right), assets.tile`transparency16`)
-    inventory.unshift(sprites.dungeon.floorMixed)
-}
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     mySprite.setImage(img`
         ......aaaa..........
@@ -190,28 +207,117 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
         ......a..a..........
         `)
 })
-function blast () {
-    projectile = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . 9 . . . . . . . . . 9 . . 
-        . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
-        . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
-        . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
-        . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
-        . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
-        . . . 9 . . . . . . . . . 9 . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, mySprite, 50, 50)
+function pickupright () {
+    location = mySprite.tilemapLocation()
+    tiles.setWallAt(location.getNeighboringLocation(CollisionDirection.Right), false)
+    tiles.setTileAt(location.getNeighboringLocation(CollisionDirection.Right), assets.tile`transparency16`)
+    inventory.unshift(sprites.dungeon.floorMixed)
 }
+function pickupleft () {
+    location = mySprite.tilemapLocation()
+    tiles.setWallAt(location.getNeighboringLocation(CollisionDirection.Left), false)
+    tiles.setTileAt(location.getNeighboringLocation(CollisionDirection.Left), assets.tile`transparency16`)
+    inventory.unshift(sprites.dungeon.floorMixed)
+}
+controller.player2.onEvent(ControllerEvent.Connected, function () {
+	
+})
+function blast () {
+    if (controller.up.isPressed()) {
+        projectile = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, mySprite, 0, 0 - portalspeed)
+    } else if (controller.down.isPressed()) {
+        projectile = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, mySprite, 0, portalspeed)
+    } else if (facing == 0) {
+        projectile = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, mySprite, 0 - portalspeed, 0)
+    } else {
+        projectile = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 8 8 8 8 8 8 8 8 8 9 . . 
+            . . . 9 9 9 9 9 9 9 9 9 9 9 . . 
+            . . . 9 . . . . . . . . . 9 . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, mySprite, portalspeed, 0)
+    }
+}
+scene.onOverlapTile(SpriteKind.Player, assets.tile`transparency16`, function (sprite, location) {
+    if (!(tiles.tileAtLocationEquals(mySprite.tilemapLocation(), assets.tile`myTile`) || tiles.tileAtLocationEquals(mySprite.tilemapLocation(), assets.tile`myTile0`))) {
+        if (!(tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Left), assets.tile`myTile`) || tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Left), assets.tile`myTile0`))) {
+            if (!(tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Right), assets.tile`myTile`) || tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Right), assets.tile`myTile0`))) {
+                if (!(tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Top), assets.tile`myTile`) || tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Top), assets.tile`myTile0`))) {
+                    if (!(tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Bottom), assets.tile`myTile`) || tiles.tileAtLocationEquals(mySprite.tilemapLocation().getNeighboringLocation(CollisionDirection.Bottom), assets.tile`myTile0`))) {
+                        can_portl = 1
+                    }
+                }
+            }
+        }
+    }
+})
 let projectile: Sprite = null
 let location: tiles.Location = null
+let can_portl = 0
+let portalspeed = 0
 let inventory: Image[] = []
 let facing = 0
 let mySprite: Sprite = null
@@ -362,3 +468,5 @@ controller.moveSprite(mySprite, 100, 0)
 mySprite.setVelocity(0, 100)
 mySprite.ay = 500
 inventory = []
+portalspeed = 100
+can_portl = 0
